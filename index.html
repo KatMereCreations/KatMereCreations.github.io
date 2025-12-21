@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KatMere Creations | Streamer & Artist</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --bg-dark: #0f111a;
+            --bg-card: #1a1d2d;
+            --primary-blue: #3b82f6;
+            --accent-blue: #60a5fa;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --twitch-purple: #9146FF;
+            --kick-green: #53FC18;
+            --kofi-gold: #FF5E5B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: rgba(15, 17, 26, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary-blue); letter-spacing: 2px; text-transform: uppercase; }
+
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links li { cursor: pointer; font-weight: 500; }
+        .nav-links li:hover { color: var(--accent-blue); }
+        .nav-links li.active { color: var(--primary-blue); border-bottom: 2px solid var(--primary-blue); }
+
+        /* --- LAYOUT UTILITIES --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 8rem 0; 
+            overflow: hidden;
+            margin-bottom: 4rem;
+        }
+
+        .hero-bg-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        .hero-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0; 
+            transition: opacity 1.5s ease-in-out; 
+        }
+
+        .hero-slide.active { opacity: 1; }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 17, 26, 0.75); 
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            object-fit: cover;
+            margin-bottom: 1rem;
+            background-color: #333;
+        }
+
+        h1 { font-size: 3.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 10px rgba(0,0,0,0.5); text-transform: uppercase; }
+        .tagline { color: var(--text-muted); font-size: 1.3rem; margin-bottom: 2rem; }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+
+        .btn-twitch { background-color: var(--twitch-purple); color: white; }
+        .btn-twitch:hover { background-color: #772ce8; box-shadow: 0 0 15px rgba(145, 70, 255, 0.4); }
+        
+        .btn-blue { background-color: var(--primary-blue); color: white; }
+        .btn-blue:hover { background-color: var(--accent-blue); }
+
+        .btn-kofi { background-color: var(--kofi-gold); color: white; }
+        .btn-kofi:hover { background-color: #d44e4b; box-shadow: 0 0 15px rgba(255, 94, 91, 0.4); }
+
+        .about-box {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 3rem;
+            text-align: left;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        /* --- PORTFOLIO SECTION STYLES --- */
+        .portfolio-section { margin-top: 4rem; text-align: center; }
+        
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .portfolio-item {
+            border-radius: 12px;
+            overflow: hidden;
+            height: 300px; 
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+            cursor: pointer; 
+        }
+
+        .portfolio-item:hover {
+            border-color: var(--primary-blue);
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .portfolio-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        /* --- SHOP STYLES --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card-img {
+            width: 100%;
+            height: 250px; 
+            background-color: #2d3748;
+            object-fit: contain; 
+            padding: 10px;
+            cursor: pointer; 
+        }
+
+        .card-content { padding: 1.5rem; }
+        .card-title { font-size: 1.2rem; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .price { color: var(--accent-blue); font-weight: bold; font-size: 1.1rem; }
+
+        /* --- COMMISSIONS --- */
+        .commission-status {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 2rem;
+            border: 1px solid var(--primary-blue);
+        }
+
+        /* --- SOCIALS FOOTER --- */
+        .social-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 4rem;
+            padding: 2rem;
+            border-top: 1px solid #2d3748;
+            flex-wrap: wrap; 
+        }
+        .social-link { font-size: 1.1rem; color: var(--text-muted); }
+        .social-link:hover { color: var(--primary-blue); }
+        
+        .social-link.kick:hover { color: var(--kick-green); }
+        .social-link.youtube:hover { color: #FF0000; }
+        .social-link.twitch:hover { color: var(--twitch-purple); }
+
+        /* --- LIGHTBOX (POPUP) --- */
+        #lightbox {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 2px solid var(--primary-blue);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .nav-links { gap: 1rem; font-size: 0.9rem; }
+            .portfolio-item { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">KATMERE CREATIONS</div>
+        <ul class="nav-links">
+            <li onclick="showSection('home')" class="active" id="nav-home">Home</li>
+            <li onclick="showSection('shop')" id="nav-shop">Shop</li>
+            <li onclick="showSection('commissions')" id="nav-commissions">Commissions</li>
+        </ul>
+    </nav>
+
+    <div class="container">
+
+        <div id="home" class="section active">
+            
+            <div class="hero">
+                <div class="hero-bg-container" id="bg-container"></div>
+                <div class="hero-overlay"></div>
+
+                <div class="hero-content">
+                    <img src="images/profile.png" alt="Katmere" class="profile-img">
+                    <h1>KATMERE CREATIONS</h1>
+                    <p class="tagline">Variety Streamer | D&D Enthusiast | Digital Artist</p>
+                    
+                    <div style="margin-top: 2rem;">
+                        <a href="https://www.twitch.tv/kat_mere" target="_blank" class="btn btn-twitch">
+                            Watch Live on Twitch
+                        </a>
+                        <a href="#" onclick="showSection('shop')" class="btn btn-blue">
+                            View Art Shop
+                        </a>
+                    </div>
+
+                    <div class="about-box">
+                        <h2>About Me</h2>
+                        <p>
+                            Welcome! I'm Katmere. I'm a variety streamer who loves diving into a wide genre of video games, 
+                            getting lost in Dungeons & Dragons campaigns, and creating digital art. 
+                            Whether I'm rolling a Nat 20 or panicking in a horror game, I'm just here for the chaos and the vibes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portfolio-section">
+                <h2>Portfolio Showcase</h2>
+                <p class="tagline" style="margin-bottom: 2rem;">Click any image to enlarge.</p>
+                <div class="portfolio-grid">
+                    <div class="portfolio-item"><img src="images/port1.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port2.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port3.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port4.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port5.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port6.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port7.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port8.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port9.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port10.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port11.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port12.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port13.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port14.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port15.png" class="portfolio-img zoomable"></div>
+                    <div class="portfolio-item"><img src="images/port16.png" class="portfolio-img zoomable"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="shop" class="section">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Sticker Shop</h2>
+            <div class="grid">
+
+                <div class="card">
+                    <img src="images/9-ball_ALASKA_WITH_BOLD_ALASKA_white_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">9-Ball Alaska</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Amphibious_Division.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Amphibious Division</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Amphibious_Division_duck.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Amphibious Division Duck</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/AntiSadnessSproutKitty_with_white_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Anti Sadness Sprout Kitty</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Candy_Heart_Green_Dont_Call_Me_with_white_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Candy Heart: Don't Call Me</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Candy_Heart_Orange_605_with_white_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Candy Heart: 605</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Candy_Heart_Yellow_Car_Warranty_with_white_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Candy Heart: Car Warranty</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Chrisformer_Uncle_Goose.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Chrisformer Uncle Goose</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Critical_Failure_blood_slatter.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Critical Failure</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/cyber_ninja.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Cyber Ninja</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Cyran_RedPanda.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Cyran Red Panda</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_Barbarian.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Barbarian</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_BARD.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Bard</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_Cleric.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Cleric</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_Paladin.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Paladin</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_Sorcerer.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Sorcerer</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-_Wizard.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Wizard</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-Monk.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Monk</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/DD_Sticker_-Rogue.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">D&D Class: Rogue</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Fatherofcurses_-_Lulu.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Fatherofcurses: Lulu</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Fatherofcurses_-_Motzi.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Fatherofcurses: Motzi</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Fatherofcurses_-_Perogie.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Fatherofcurses: Perogie</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Fatherofcurses-_Luna_Head.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Fatherofcurses: Luna Head</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/fatjthehungry_Stuffy_the_Moose.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Stuffy the Moose</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/for_boots2.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">For Boots</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Gift_Duck_Brighter.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Gift Duck</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/hayboots.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Hayboots</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Hayboots_Rimaru_with_hat.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Hayboots Rimaru</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Health_Potion2.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Health Potion</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/IHeartBoba_update.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">I Heart Boba</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Jan_tona_out_of_this_world_pancakes_with_edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Out of this World Pancakes</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Julius_Cheeser_new.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Julius Cheeser</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Maggie_relax_With_Edge.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Maggie Relax</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/minefield_survivor_grey.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Minefield Survivor</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Mushroom_house.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Mushroom House</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/No_Sporks_left_to_give_WHITE_EDGE.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">No Sporks Left to Give</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Pheniox_Let_it_burn_brighter.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Phoenix: Let it Burn</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Pumpkin_Cutie-Pie_v2.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Pumpkin Cutie Pie</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Tears_of_my_Haters.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Tears of my Haters</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img src="images/Vartrex_Paladin_Bear.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Vartrex Paladin Bear</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="commissions" class="section">
+            <div class="commission-status">
+                <strong>STATUS: CHECK KO-FI</strong><br>
+                For real-time slot availability, please check my commission page below.
+            </div>
+
+            <h2 style="text-align: center;">Commission Info</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-content" style="text-align: center;">
+                        <h3>Sketch / Lineart</h3>
+                        <p style="margin: 1rem 0; color: var(--text-muted);">Clean lines, no color.</p>
+                        <div class="price">$0.00</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content" style="text-align: center;">
+                        <h3>Flat Color</h3>
+                        <p style="margin: 1rem 0; color: var(--text-muted);">Clean lines with base colors.</p>
+                        <div class="price">$0.00</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content" style="text-align: center;">
+                        <h3>Full Render</h3>
+                        <p style="margin: 1rem 0; color: var(--text-muted);">Fully shaded, lighting effects.</p>
+                        <div class="price">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-box" style="margin-top: 3rem; text-align: center;">
+                <h3>Ready to Request?</h3>
+                <p style="margin-bottom: 2rem; color: var(--text-muted);">
+                    I use Ko-fi to handle all requests securely. This ensures you can upload references 
+                    and track your order status easily.
+                </p>
+                
+                <a href="https://ko-fi.com/thisiskatmere/commissions" target="_blank" class="btn btn-kofi" style="font-size: 1.2rem; padding: 15px 40px;">
+                    Order on Ko-fi
+                </a>
+            </div>
+        </div>
+
+        <div class="social-bar">
+            <a href="https://www.twitch.tv/kat_mere" target="_blank" class="social-link twitch">Twitch</a>
+            <a href="https://kick.com/kat-mere" target="_blank" class="social-link kick">Kick</a>
+            <a href="https://www.youtube.com/@KatMere" target="_blank" class="social-link youtube">YouTube</a>
+            <a href="https://www.tiktok.com/@katmere" target="_blank" class="social-link">TikTok</a>
+            <a href="https://www.instagram.com/thisiskatmere" target="_blank" class="social-link">Instagram</a>
+        </div>
+
+    </div>
+
+    <div id="lightbox">
+        <img id="lightbox-img" src="" alt="Zoomed Image">
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            const navLinks = document.querySelectorAll('.nav-links li');
+            navLinks.forEach(link => link.classList.remove('active'));
+            document.getElementById('nav-' + sectionId).classList.add('active');
+        }
+
+        // --- BACKGROUND IMAGES ---
+        const artImages = [
+            "images/art1.png",
+            "images/art2.png",
+            "images/art3.png",
+            "images/art4.png",
+            "images/art5.png",
+            "images/art6.png",
+            "images/art7.png",
+            "images/art8.png",
+            "images/art9.png",
+            "images/art10.png"
+        ];
+
+        const bgContainer = document.getElementById('bg-container');
+        let currentIndex = 0;
+
+        artImages.forEach((url, index) => {
+            const div = document.createElement('div');
+            div.classList.add('hero-slide');
+            div.style.backgroundImage = `url('${url}')`;
+            if (index === 0) div.classList.add('active'); 
+            bgContainer.appendChild(div);
+        });
+
+        const slides = document.querySelectorAll('.hero-slide');
+
+        setInterval(() => {
+            slides[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % slides.length;
+            slides[currentIndex].classList.add('active');
+        }, 5000); 
+
+        // --- LIGHTBOX LOGIC ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const zoomableImages = document.querySelectorAll('.zoomable');
+
+        zoomableImages.forEach(img => {
+            img.addEventListener('click', () => {
+                lightbox.style.display = 'flex';
+                lightboxImg.src = img.src;
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.style.display = 'none';
+        });
+
+    </script>
+</body>
+</html>
