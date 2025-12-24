@@ -674,8 +674,13 @@
             lightbox.style.display = 'none';
         });
 
-        /* --- BOOT SCREEN & GLITCH LOGIC --- */
-        window.onload = function() {
+        /* --- BOOT SCREEN & GLITCH LOGIC (FAST VERSION) --- */
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // Start Fluid Sim immediately
+            initLiquidEther();
+
+            // Start the timer
             setTimeout(() => {
                 // 1. Hide the boot screen
                 document.getElementById('boot-screen').classList.add('boot-hidden');
@@ -688,39 +693,38 @@
                 document.body.style.overflowX = 'hidden'; 
                 document.body.style.overflowY = 'auto';
 
-                // 4. Start the Fluid Simulation
-                initLiquidEther();
+            }, 3000); // 3 seconds wait
+        });
 
-            }, 3000); // 5000 milliseconds = 5 seconds
-        };
-
-        /* --- LIQUID ETHER SIMULATION ENGINE (CONVERTED FROM REACT) --- */
+        /* --- LIQUID ETHER SIMULATION ENGINE (OPTIMIZED) --- */
         function initLiquidEther() {
             const container = document.getElementById('liquid-container');
             if(!container) return;
 
-            // CONFIGURATION (Adjusted for subtle effect)
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // CONFIGURATION 
             const CONFIG = {
                 colors: ['#5227FF', '#FF9FFC', '#B19EEF'],
-                mouseForce: 15,       // Lower force for subtle push
-                cursorSize: 25,       // Much smaller cursor
-                isViscous: true,      // Turn ON viscosity
-                viscous: 20,          // Viscosity value (higher = thicker/faster fade)
-                iterationsViscous: 32,
-                iterationsPoisson: 32,
-                dt: 0.010,            // Slower time step for less chaotic bounce
-                BFECC: true,
-                resolution: 0.5,
+                mouseForce: 20,       // Slightly stronger push to compensate for lower FPS
+                cursorSize: 30,
+                isViscous: true,
+                viscous: 20,
+                iterationsViscous: isMobile ? 16 : 32, // Lower physics iterations on mobile
+                iterationsPoisson: isMobile ? 16 : 32, // Lower physics iterations on mobile
+                dt: 0.012,
+                BFECC: !isMobile,     // Disable expensive error correction on mobile
+                resolution: isMobile ? 0.2 : 0.4, // Lower resolution for performance
                 isBounce: false,
                 autoDemo: true,
                 autoSpeed: 0.5,
-                autoIntensity: 1.5,   // Slower auto-demo movement
+                autoIntensity: 1.5,
                 takeoverDuration: 0.25,
                 autoResumeDelay: 3000,
                 autoRampDuration: 0.6
             };
 
-            // --- SHADERS ---
+            // --- SHADERS (Standard) ---
             const face_vert = `attribute vec3 position;uniform vec2 px;uniform vec2 boundarySpace;varying vec2 uv;precision highp float;void main(){vec3 pos=position;vec2 scale=1.0-boundarySpace*2.0;pos.xy=pos.xy*scale;uv=vec2(0.5)+(pos.xy)*0.5;gl_Position=vec4(pos,1.0);}`;
             const line_vert = `attribute vec3 position;uniform vec2 px;precision highp float;varying vec2 uv;void main(){vec3 pos=position;uv=0.5+pos.xy*0.5;vec2 n=sign(pos.xy);pos.xy=abs(pos.xy)-px*1.0;pos.xy*=n;gl_Position=vec4(pos,1.0);}`;
             const mouse_vert = `precision highp float;attribute vec3 position;attribute vec2 uv;uniform vec2 center;uniform vec2 scale;uniform vec2 px;varying vec2 vUv;void main(){vec2 pos=position.xy*scale*2.0*px+center;vUv=uv;gl_Position=vec4(pos,0.0,1.0);}`;
@@ -732,13 +736,13 @@
             const pressure_frag = `precision highp float;uniform sampler2D pressure;uniform sampler2D velocity;uniform vec2 px;uniform float dt;varying vec2 uv;void main(){float step=1.0;float p0=texture2D(pressure,uv+vec2(px.x*step,0.0)).r;float p1=texture2D(pressure,uv-vec2(px.x*step,0.0)).r;float p2=texture2D(pressure,uv+vec2(0.0,px.y*step)).r;float p3=texture2D(pressure,uv-vec2(0.0,px.y*step)).r;vec2 v=texture2D(velocity,uv).xy;vec2 gradP=vec2(p0-p1,p2-p3)*0.5;v=v-gradP*dt;gl_FragColor=vec4(v,0.0,1.0);}`;
             const viscous_frag = `precision highp float;uniform sampler2D velocity;uniform sampler2D velocity_new;uniform float v;uniform vec2 px;uniform float dt;varying vec2 uv;void main(){vec2 old=texture2D(velocity,uv).xy;vec2 new0=texture2D(velocity_new,uv+vec2(px.x*2.0,0.0)).xy;vec2 new1=texture2D(velocity_new,uv-vec2(px.x*2.0,0.0)).xy;vec2 new2=texture2D(velocity_new,uv+vec2(0.0,px.y*2.0)).xy;vec2 new3=texture2D(velocity_new,uv-vec2(0.0,px.y*2.0)).xy;vec2 newv=4.0*old+v*dt*(new0+new1+new2+new3);newv/=4.0*(1.0+v*dt);gl_FragColor=vec4(newv,0.0,0.0);}`;
 
-            // --- HELPER CLASSES ---
             class CommonClass {
-                constructor() { this.width=0; this.height=0; this.aspect=1; this.pixelRatio=1; this.renderer=null; }
+                constructor() { this.width=0; this.height=0; this.renderer=null; }
                 init(el) {
-                    this.pixelRatio = Math.min(window.devicePixelRatio||1, 2);
+                    // Force lower pixel ratio on mobile to save GPU
+                    this.pixelRatio = isMobile ? 1 : Math.min(window.devicePixelRatio||1, 2);
                     this.resize(el);
-                    this.renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+                    this.renderer = new THREE.WebGLRenderer({antialias:!isMobile, alpha:true});
                     this.renderer.autoClear=false;
                     this.renderer.setClearColor(new THREE.Color(0x000000),0);
                     this.renderer.setPixelRatio(this.pixelRatio);
@@ -755,10 +759,7 @@
             const Common = new CommonClass();
 
             class MouseClass {
-                constructor() {
-                    this.coords=new THREE.Vector2(); this.coords_old=new THREE.Vector2(); this.diff=new THREE.Vector2();
-                    this.isHoverInside=false; this.timer=null;
-                }
+                constructor() { this.coords=new THREE.Vector2(); this.coords_old=new THREE.Vector2(); this.diff=new THREE.Vector2(); this.isHoverInside=false; this.timer=null; }
                 init(el) {
                     const updateCoords = (x,y) => {
                         const rect = el.getBoundingClientRect();
@@ -770,8 +771,8 @@
                         this.timer = setTimeout(()=>this.isHoverInside=false, 2000);
                     };
                     window.addEventListener('mousemove', e => updateCoords(e.clientX, e.clientY));
-                    window.addEventListener('touchstart', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY));
-                    window.addEventListener('touchmove', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY));
+                    window.addEventListener('touchstart', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+                    window.addEventListener('touchmove', e => updateCoords(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
                 }
                 update() {
                     this.diff.subVectors(this.coords, this.coords_old);
@@ -781,7 +782,6 @@
             }
             const Mouse = new MouseClass();
 
-            // --- SHADER PASSES ---
             class ShaderPass {
                 constructor(props) {
                     this.props = props;
@@ -798,114 +798,54 @@
                 }
             }
 
-            // --- SIMULATION ---
             class Simulation {
-                constructor() {
-                    this.fbos = {};
-                    this.init();
-                }
+                constructor() { this.fbos = {}; this.init(); }
                 init() {
-                    // Create Framebuffers
                     const w = Math.round(CONFIG.resolution * Common.width);
                     const h = Math.round(CONFIG.resolution * Common.height);
                     const type = (/(iPad|iPhone|iPod)/i.test(navigator.userAgent)) ? THREE.HalfFloatType : THREE.FloatType;
                     const opts = { type, depthBuffer:false, stencilBuffer:false, minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter };
-                    ['vel_0','vel_1','div','pressure_0','pressure_1'].forEach(k => {
-                        this.fbos[k] = new THREE.WebGLRenderTarget(w, h, opts);
-                    });
+                    ['vel_0','vel_1','div','pressure_0','pressure_1'].forEach(k => { this.fbos[k] = new THREE.WebGLRenderTarget(w, h, opts); });
                     this.cellScale = new THREE.Vector2(1/w, 1/h);
                     this.boundarySpace = new THREE.Vector2(CONFIG.isBounce?0:this.cellScale.x, CONFIG.isBounce?0:this.cellScale.y);
 
-                    // Initialize Shaders
-                    this.advection = new ShaderPass({
-                        material: { vertexShader: face_vert, fragmentShader: advection_frag, uniforms: {
-                            boundarySpace: {value: this.boundarySpace}, px: {value: this.cellScale}, fboSize: {value: new THREE.Vector2(w,h)},
-                            velocity: {value: this.fbos.vel_0.texture}, dt: {value: CONFIG.dt}, isBFECC: {value: CONFIG.BFECC}
-                        }}, output: this.fbos.vel_1
-                    });
-                    this.externalForce = new ShaderPass({
-                        material: { vertexShader: mouse_vert, fragmentShader: externalForce_frag, blending: THREE.AdditiveBlending, uniforms: {
-                            px: {value: this.cellScale}, force: {value: new THREE.Vector2()}, center: {value: new THREE.Vector2()},
-                            scale: {value: new THREE.Vector2(CONFIG.cursorSize, CONFIG.cursorSize)}
-                        }}, output: this.fbos.vel_1
-                    });
-                    this.viscous = new ShaderPass({
-                        material: { vertexShader: face_vert, fragmentShader: viscous_frag, uniforms: {
-                            boundarySpace: {value: this.boundarySpace}, velocity: {value: this.fbos.vel_1.texture}, velocity_new: {value: this.fbos.vel_1.texture},
-                            v: {value: CONFIG.viscous}, px: {value: this.cellScale}, dt: {value: CONFIG.dt}
-                        }}, output: this.fbos.vel_1
-                    });
-                    this.divergence = new ShaderPass({
-                        material: { vertexShader: face_vert, fragmentShader: divergence_frag, uniforms: {
-                            velocity: {value: this.fbos.vel_1.texture}, px: {value: this.cellScale}, dt: {value: CONFIG.dt}
-                        }}, output: this.fbos.div
-                    });
-                    this.poisson = new ShaderPass({
-                        material: { vertexShader: face_vert, fragmentShader: poisson_frag, uniforms: {
-                            pressure: {value: this.fbos.pressure_0.texture}, divergence: {value: this.fbos.div.texture}, px: {value: this.cellScale}
-                        }}, output: this.fbos.pressure_1
-                    });
-                    this.pressure = new ShaderPass({
-                        material: { vertexShader: face_vert, fragmentShader: pressure_frag, uniforms: {
-                            pressure: {value: this.fbos.pressure_1.texture}, velocity: {value: this.fbos.vel_1.texture}, px: {value: this.cellScale}, dt: {value: CONFIG.dt}
-                        }}, output: this.fbos.vel_0
-                    });
+                    this.advection = new ShaderPass({ material: { vertexShader: face_vert, fragmentShader: advection_frag, uniforms: { boundarySpace: {value: this.boundarySpace}, px: {value: this.cellScale}, fboSize: {value: new THREE.Vector2(w,h)}, velocity: {value: this.fbos.vel_0.texture}, dt: {value: CONFIG.dt}, isBFECC: {value: CONFIG.BFECC} }}, output: this.fbos.vel_1 });
+                    this.externalForce = new ShaderPass({ material: { vertexShader: mouse_vert, fragmentShader: externalForce_frag, blending: THREE.AdditiveBlending, uniforms: { px: {value: this.cellScale}, force: {value: new THREE.Vector2()}, center: {value: new THREE.Vector2()}, scale: {value: new THREE.Vector2(CONFIG.cursorSize, CONFIG.cursorSize)} }}, output: this.fbos.vel_1 });
+                    this.viscous = new ShaderPass({ material: { vertexShader: face_vert, fragmentShader: viscous_frag, uniforms: { boundarySpace: {value: this.boundarySpace}, velocity: {value: this.fbos.vel_1.texture}, velocity_new: {value: this.fbos.vel_1.texture}, v: {value: CONFIG.viscous}, px: {value: this.cellScale}, dt: {value: CONFIG.dt} }}, output: this.fbos.vel_1 });
+                    this.divergence = new ShaderPass({ material: { vertexShader: face_vert, fragmentShader: divergence_frag, uniforms: { velocity: {value: this.fbos.vel_1.texture}, px: {value: this.cellScale}, dt: {value: CONFIG.dt} }}, output: this.fbos.div });
+                    this.poisson = new ShaderPass({ material: { vertexShader: face_vert, fragmentShader: poisson_frag, uniforms: { pressure: {value: this.fbos.pressure_0.texture}, divergence: {value: this.fbos.div.texture}, px: {value: this.cellScale} }}, output: this.fbos.pressure_1 });
+                    this.pressure = new ShaderPass({ material: { vertexShader: face_vert, fragmentShader: pressure_frag, uniforms: { pressure: {value: this.fbos.pressure_1.texture}, velocity: {value: this.fbos.vel_1.texture}, px: {value: this.cellScale}, dt: {value: CONFIG.dt} }}, output: this.fbos.vel_0 });
                 }
                 update() {
-                    // 1. Advection
                     this.advection.update();
-                    // 2. Mouse Force
                     const force = this.externalForce.uniforms;
                     force.force.value.set((Mouse.diff.x/2)*CONFIG.mouseForce, (Mouse.diff.y/2)*CONFIG.mouseForce);
-                    force.center.value.set(
-                        Math.min(Math.max(Mouse.coords.x, -1+CONFIG.cursorSize*this.cellScale.x), 1-CONFIG.cursorSize*this.cellScale.x),
-                        Math.min(Math.max(Mouse.coords.y, -1+CONFIG.cursorSize*this.cellScale.y), 1-CONFIG.cursorSize*this.cellScale.y)
-                    );
+                    force.center.value.set(Math.min(Math.max(Mouse.coords.x, -1+CONFIG.cursorSize*this.cellScale.x), 1-CONFIG.cursorSize*this.cellScale.x), Math.min(Math.max(Mouse.coords.y, -1+CONFIG.cursorSize*this.cellScale.y), 1-CONFIG.cursorSize*this.cellScale.y));
                     this.externalForce.update();
-                    // 3. Viscous (optional)
                     if(CONFIG.isViscous) {
-                        let v_in = this.fbos.vel_1, v_out = this.fbos.vel_1; // Reuse buffer for simplicity in this port
-                        for(let i=0; i<CONFIG.iterationsViscous; i++) {
-                            this.viscous.uniforms.velocity.value = v_in.texture;
-                            this.viscous.props.output = v_out;
-                            this.viscous.update();
-                        }
+                        let v_in = this.fbos.vel_1, v_out = this.fbos.vel_1;
+                        for(let i=0; i<CONFIG.iterationsViscous; i++) { this.viscous.uniforms.velocity.value = v_in.texture; this.viscous.props.output = v_out; this.viscous.update(); }
                     }
-                    // 4. Divergence
                     this.divergence.uniforms.velocity.value = this.fbos.vel_1.texture;
                     this.divergence.update();
-                    // 5. Poisson (Pressure Solver)
                     let p_in = this.fbos.pressure_0, p_out = this.fbos.pressure_1;
-                    for(let i=0; i<CONFIG.iterationsPoisson; i++) {
-                        this.poisson.uniforms.pressure.value = p_in.texture;
-                        this.poisson.props.output = p_out;
-                        this.poisson.update();
-                        [p_in, p_out] = [p_out, p_in];
-                    }
-                    // 6. Subtract Gradient
+                    for(let i=0; i<CONFIG.iterationsPoisson; i++) { this.poisson.uniforms.pressure.value = p_in.texture; this.poisson.props.output = p_out; this.poisson.update(); [p_in, p_out] = [p_out, p_in]; }
                     this.pressure.uniforms.pressure.value = p_out.texture;
                     this.pressure.update();
                 }
             }
 
-            // --- PALETTE TEXTURE GENERATOR ---
             function createPalette(colors) {
                 const data = new Uint8Array(colors.length * 4);
                 colors.forEach((c, i) => {
                     const col = new THREE.Color(c);
-                    data[i*4] = Math.floor(col.r*255);
-                    data[i*4+1] = Math.floor(col.g*255);
-                    data[i*4+2] = Math.floor(col.b*255);
-                    data[i*4+3] = 255;
+                    data[i*4] = Math.floor(col.r*255); data[i*4+1] = Math.floor(col.g*255); data[i*4+2] = Math.floor(col.b*255); data[i*4+3] = 255;
                 });
                 const tex = new THREE.DataTexture(data, colors.length, 1, THREE.RGBAFormat);
-                tex.minFilter = THREE.LinearFilter;
-                tex.magFilter = THREE.LinearFilter;
-                tex.needsUpdate = true;
+                tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter; tex.needsUpdate = true;
                 return tex;
             }
 
-            // --- MAIN INIT ---
             Common.init(container);
             Mouse.init(container);
             const sim = new Simulation();
@@ -913,50 +853,44 @@
             
             const outputMesh = new THREE.Mesh(
                 new THREE.PlaneGeometry(2,2),
-                new THREE.RawShaderMaterial({
-                    vertexShader: face_vert, fragmentShader: color_frag,
-                    uniforms: {
-                        velocity: {value: sim.fbos.vel_0.texture},
-                        palette: {value: palette},
-                        bgColor: {value: new THREE.Vector4(0,0,0,1)}
-                    }
-                })
+                new THREE.RawShaderMaterial({ vertexShader: face_vert, fragmentShader: color_frag, uniforms: { velocity: {value: sim.fbos.vel_0.texture}, palette: {value: palette}, bgColor: {value: new THREE.Vector4(0,0,0,1)} } })
             );
             const scene = new THREE.Scene();
             scene.add(outputMesh);
             const camera = new THREE.Camera();
 
-            // --- ANIMATION LOOP ---
-            let lastTime = Date.now();
+            // --- OPTIMIZED LOOP WITH FRAME LIMITER ---
             let autoDemo = { x: 0, y: 0, targetX: 0.5, targetY: 0.5 };
-            
-            function loop() {
-                // Auto Demo Logic
+            let lastFrameTime = 0;
+            const targetFPS = 30; // Limit FPS for smooth scroll
+            const frameInterval = 1000 / targetFPS;
+
+            function loop(currentTime) {
+                requestAnimationFrame(loop);
+
+                // Throttle FPS to ~30
+                const deltaTime = currentTime - lastFrameTime;
+                if (deltaTime < frameInterval) return;
+                lastFrameTime = currentTime - (deltaTime % frameInterval);
+
                 if(CONFIG.autoDemo && !Mouse.isHoverInside) {
                     const now = Date.now() * 0.001;
                     const demoX = Math.sin(now * CONFIG.autoSpeed) * 0.5;
                     const demoY = Math.cos(now * CONFIG.autoSpeed * 0.8) * 0.5;
                     Mouse.coords.set(demoX, demoY);
                     Mouse.diff.set((demoX - autoDemo.x)*CONFIG.autoIntensity, (demoY - autoDemo.y)*CONFIG.autoIntensity);
-                    autoDemo.x = demoX;
-                    autoDemo.y = demoY;
+                    autoDemo.x = demoX; autoDemo.y = demoY;
                 }
                 
                 Mouse.update();
                 sim.update();
                 outputMesh.material.uniforms.velocity.value = sim.fbos.vel_0.texture;
                 Common.renderer.render(scene, camera);
-                requestAnimationFrame(loop);
             }
-            loop();
+            loop(0);
 
-            // Resize Handler
-            window.addEventListener('resize', () => {
-                Common.resize(container);
-                sim.init(); // Re-init FBOs on resize
-            });
+            window.addEventListener('resize', () => { Common.resize(container); sim.init(); });
         }
     </script>
 </body>
 </html>
-
