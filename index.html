@@ -245,6 +245,18 @@
         .card-content { padding: 1.5rem; }
         .card-title { font-size: 1.2rem; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .price { color: var(--accent-blue); font-weight: bold; font-size: 1.1rem; }
+        
+        .coming-soon-banner {
+            grid-column: 1 / -1; 
+            background-color: rgba(59, 130, 246, 0.1); 
+            border: 1px dashed var(--primary-blue); 
+            padding: 2rem; 
+            border-radius: 10px; 
+            text-align: center; 
+            color: var(--text-muted); 
+            font-size: 1.2rem;
+            backdrop-filter: blur(5px);
+        }
 
         .commission-status {
             background-color: rgba(59, 130, 246, 0.1);
@@ -351,7 +363,7 @@
                     <div class="portfolio-item"><img src="images/port13.png" class="portfolio-img zoomable"></div>
                     <div class="portfolio-item"><img src="images/port14.png" class="portfolio-img zoomable"></div>
                     <div class="portfolio-item"><img src="images/port15.png" class="portfolio-img zoomable"></div>
-                                        
+                     
                     <div class="portfolio-item"><img src="images/9-ball_ALASKA_WITH_BOLD_ALASKA_white_edge.png" class="portfolio-img zoomable"></div>
                     <div class="portfolio-item"><img src="images/Amphibious_Division.png" class="portfolio-img zoomable"></div>
                     <div class="portfolio-item"><img src="images/Amphibious_Division_duck.png" class="portfolio-img zoomable"></div>
@@ -405,11 +417,16 @@
                 <button class="filter-btn" onclick="filterShop('helldivers', this)">Helldivers</button>
                 <button class="filter-btn" onclick="filterShop('pokemon', this)">Pokémon</button>
                 <button class="filter-btn" onclick="filterShop('candy', this)">Candy Hearts</button>
-                <button class="filter-btn" onclick="filterShop('misc', this)">Misc</button>
+                <button class="filter-btn" onclick="filterShop('other', this)">Other</button>
             </div>
 
             <div class="grid">
-                 <div class="card shop-item" data-category="misc">
+                
+                <div class="shop-item coming-soon-banner" data-category="pokemon">
+                    More Pokémon items are currently in the works. Check back soon!
+                </div>
+
+                 <div class="card shop-item" data-category="other">
                     <img src="images/9-ball_ALASKA_WITH_BOLD_ALASKA_white_edge.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">9-Ball Alaska</div>
@@ -427,10 +444,17 @@
                     <img src="images/Amphibious_Division_duck.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Amphibious Division Duck</div>
+                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>               
+                    </div>
+                </div>
+                 <div class="card shop-item" data-category="helldivers">
+                    <img src="images/minefield_survivor_grey.png" class="card-img zoomable">
+                    <div class="card-content">
+                        <div class="card-title">Minefield Survivor</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/AntiSadnessSproutKitty_with_white_edge.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Anti Sadness Sprout Kitty</div>
@@ -521,7 +545,7 @@
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="pokemon">
+                <div class="card shop-item" data-category="other">
                     <img src="images/Gift_Duck_Brighter.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Gift Duck</div>
@@ -535,56 +559,49 @@
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/IHeartBoba_update.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">I Heart Boba</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="dnd">
                     <img src="images/Julius_Cheeser_new.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Julius Cheeser</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="helldivers">
-                    <img src="images/minefield_survivor_grey.png" class="card-img zoomable">
-                    <div class="card-content">
-                        <div class="card-title">Minefield Survivor</div>
-                        <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
-                    </div>
-                </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/Mushroom_house.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Mushroom House</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/No_Sporks_left_to_give_WHITE_EDGE.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">No Sporks Left to Give</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/Pheniox_Let_it_burn_brighter.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Phoenix: Let it Burn</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/Pumpkin_Cutie-Pie_v2.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Pumpkin Cutie Pie</div>
                         <a href="https://ko-fi.com/thisiskatmere/shop" target="_blank" class="btn btn-kofi" style="width: 100%; text-align: center;">Buy on Ko-fi</a>
                     </div>
                 </div>
-                <div class="card shop-item" data-category="misc">
+                <div class="card shop-item" data-category="other">
                     <img src="images/Tears_of_my_Haters.png" class="card-img zoomable">
                     <div class="card-content">
                         <div class="card-title">Tears of my Haters</div>
